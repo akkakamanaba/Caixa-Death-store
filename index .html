@@ -2,188 +2,172 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Death Store - Caixa da Sorte</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>death store - Roleta</title>
 
 <style>
-body {
-  background: radial-gradient(circle at top, #2a003d, #0b0014);
-  color: #fff;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  flex-direction: column;
-  text-align: center;
-  overflow: hidden;
+body{
+  background: radial-gradient(circle at top,#2a003d,#0b0014);
+  color:#fff;
+  font-family:Arial, sans-serif;
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
 }
 
-h1 {
-  font-size: 40px;
-  color: #b84cff;
-  text-shadow: 0 0 20px #7a00ff;
+h1{
+  color:#b84cff;
+  text-shadow:0 0 20px #7a00ff;
+  margin:25px 0 10px;
 }
 
-input {
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  width: 300px;
-  text-align: center;
+input{
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  width:280px;
+  text-align:center;
 }
 
-button {
-  margin-top: 15px;
-  background: linear-gradient(135deg, #7a00ff, #b84cff);
-  border: none;
-  padding: 14px 40px;
-  font-size: 20px;
-  border-radius: 12px;
-  color: white;
-  cursor: pointer;
+button{
+  margin-top:12px;
+  padding:14px 36px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#7a00ff,#b84cff);
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+#girar{display:none}
+
+.roleta-wrap{
+  margin-top:25px;
+  width:320px;
+  height:320px;
+  display:none;
+  position:relative;
 }
 
-#abrir { display: none; }
-
-.caixa {
-  width: 220px;
-  height: 220px;
-  margin-top: 30px;
-  background: linear-gradient(135deg, #7a00ff, #3a0066);
-  border-radius: 20px;
-  box-shadow: 0 0 40px #9d4cff;
-  display: none;
-  position: relative;
+.ponteiro{
+  position:absolute;
+  top:-12px;
+  left:50%;
+  transform:translateX(-50%);
+  border-left:16px solid transparent;
+  border-right:16px solid transparent;
+  border-bottom:28px solid gold;
 }
 
-.caixa.chacoalhar {
-  animation: shake 0.4s infinite;
+.roleta{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  box-shadow:0 0 40px #9d4cff;
+  overflow:hidden;
 }
 
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  50% { transform: translateX(10px); }
-  75% { transform: translateX(-10px); }
-  100% { transform: translateX(0); }
-}
+canvas{width:100%;height:100%}
 
-.fitinha {
-  position: absolute;
-  width: 8px;
-  height: 40px;
-  top: -50px;
-  animation: cair 1.5s linear forwards;
-}
-
-@keyframes cair {
-  to {
-    transform: translateY(300px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-#resultado {
-  margin-top: 25px;
-  font-size: 26px;
-  color: #e6ccff;
-  font-weight: bold;
+#resultado{
+  margin-top:15px;
+  font-size:22px;
+  font-weight:bold;
 }
 </style>
 </head>
 
 <body>
 
-<h1>☠️ Death Store ☠️</h1>
-<p>Digite sua key para abrir a Caixa da Sorte</p>
+<h1>🍀 death store 🍀</h1>
 
+<p>Digite sua key válida</p>
 <input id="keyInput" placeholder="Digite sua key">
 <button onclick="verificarKey()">Verificar Key</button>
-<button id="abrir" onclick="abrirCaixa()">🎁 Abrir Caixa</button>
+<button id="girar" onclick="girar()">🎡 Girar Roleta</button>
 
-<div class="caixa" id="caixa"></div>
+<div class="roleta-wrap" id="roletaWrap">
+  <div class="ponteiro"></div>
+  <div class="roleta" id="roleta">
+    <canvas id="canvas" width="320" height="320"></canvas>
+  </div>
+</div>
+
 <div id="resultado"></div>
 
 <script>
-const KEY_PERMANENTE = "X9qL7mA2P";
-
-const KEYS_EXPIRAM = [
-  "A7mQ2ZP9L","9XK3mA7R2","Q8PZL5A9X","m7A2K9XQZ","P3Q9mX7LA",
-  "Z9A7P2mXK","KQX7A9mP2","X9P2LAm7Q","7mXQZ2A9P","9A2P7XQmZ",
-  "Qm7X2A9PL","ZP9Q7mAX2","A9QX7mP2L","mA7Z2XP9Q","XQ9P2m7AZ",
-  "P7A2Q9mXZ","9mX2A7PQL","ZQ7A9Xm2P","A2X9P7mQZ","Q9Z7A2XmP"
-];
-
 const premios = [
-  "1.000.000 de Gemas 💎",
-  "1.500.000 de Gemas 💎",
-  "2.000.000 de Gemas 💎",
-  "2.500.000 de Gemas 💎"
+ "1 key","10.000.000 💎","25.000.000 💎","15.000.000 💎","3 KEY",
+ "99.000.000 💎","80.000.000 💎","60.000.000 💎"
 ];
 
-const keyInput = document.getElementById("keyInput");
-const resultado = document.getElementById("resultado");
-const caixa = document.getElementById("caixa");
-const btnAbrir = document.getElementById("abrir");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const roleta = document.getElementById("roleta");
+const girarBtn = document.getElementById("girar");
+const wrap = document.getElementById("roletaWrap");
 
-let keyAtual = "";
+let anguloAtual = 0;
+let girando = false;
 
-function verificarKey() {
-  const key = keyInput.value.trim();
-  keyAtual = key;
-
-  if (key === KEY_PERMANENTE) {
-    resultado.innerText = "✅ Key liberada!";
-    btnAbrir.style.display = "inline-block";
-    return;
-  }
-
-  if (KEYS_EXPIRAM.includes(key)) {
-    if (localStorage.getItem("used_" + key)) {
-      resultado.innerText = "❌ Essa key já expirou.";
-      return;
-    }
-    resultado.innerText = "✅ Key válida!";
-    btnAbrir.style.display = "inline-block";
-    return;
-  }
-
-  resultado.innerText = "❌ Key inválida.";
+function verificarKey(){
+  girarBtn.style.display="inline-block";
+  wrap.style.display="block";
 }
 
-function abrirCaixa() {
-  btnAbrir.disabled = true;
-  caixa.style.display = "block";
-  caixa.classList.add("chacoalhar");
-  resultado.innerText = "⏳ Abrindo a caixa...";
+function desenhar(){
+  const n = premios.length;
+  const ang = Math.PI * 2 / n;
 
-  for (let i = 0; i < 40; i++) {
-    const f = document.createElement("div");
-    f.className = "fitinha";
-    f.style.left = Math.random() * 220 + "px";
-    f.style.background = ["gold","violet","cyan","lime"][Math.floor(Math.random()*4)];
-    caixa.appendChild(f);
-    setTimeout(() => f.remove(), 1500);
+  for(let i=0;i<n;i++){
+    ctx.beginPath();
+    ctx.moveTo(160,160);
+    ctx.arc(160,160,150,i*ang,(i+1)*ang);
+    ctx.fillStyle = i%2 ? "#3a0066" : "#7a00ff";
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(160,160);
+    ctx.rotate(i*ang + ang/2);
+    ctx.fillStyle="#fff";
+    ctx.font="bold 13px Arial";
+    ctx.fillText(premios[i],90,5);
+    ctx.restore();
   }
+}
+desenhar();
 
-  setTimeout(() => {
-    caixa.classList.remove("chacoalhar");
+function sortearIndice(){
+  let r = Math.random() * 100;
 
-    const premio = premios[Math.floor(Math.random() * premios.length)];
-    resultado.innerText = "🎉 Parabéns! Você ganhou " + premio;
+  if (r < 50) return premios.indexOf("99.000.000 💎");
+  if (r < 85) return premios.indexOf("80.000.000 💎");
+  return premios.indexOf("60.000.000 💎");
+}
 
-    if (KEYS_EXPIRAM.includes(keyAtual)) {
-      localStorage.setItem("used_" + keyAtual, "true");
-    }
+function girar(){
+  if(girando) return;
+  girando = true;
 
-    btnAbrir.disabled = false;
-  }, 9000);
+  const index = sortearIndice();
+  const slice = 360 / premios.length;
+
+  const destino = 360 * 6 + (360 - (index * slice + slice / 2)) - 90;
+
+  anguloAtual = destino;
+
+  roleta.style.transition = "transform 4s cubic-bezier(.12,.78,.12,1)";
+  roleta.style.transform = `rotate(${anguloAtual}deg)`;
+
+  setTimeout(()=>{
+    document.getElementById("resultado").innerText =
+      "🎉 Você ganhou " + premios[index];
+    girando = false;
+  },4000);
 }
 </script>
 
